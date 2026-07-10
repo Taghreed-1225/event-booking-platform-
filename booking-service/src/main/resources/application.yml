@@ -1,0 +1,26 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: booking-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/eventbooking}
+    username: ${SPRING_DATASOURCE_USERNAME:eventbooking}
+    password: ${SPRING_DATASOURCE_PASSWORD:eventbooking}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+
+event-service:
+  base-url: ${EVENT_SERVICE_BASE_URL:http://localhost:8081}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+jwt:
+  secret: ${JWT_SECRET:demo-shared-secret-key-for-event-booking-platform-32bytes-min}

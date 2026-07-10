@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: eventbooking
+      POSTGRES_USER: eventbooking
+      POSTGRES_PASSWORD: eventbooking
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventbooking"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  event-service:
+    build: ./event-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/eventbooking
+      SPRING_DATASOURCE_USERNAME: eventbooking
+      SPRING_DATASOURCE_PASSWORD: eventbooking
+      JWT_SECRET: demo-shared-secret-key-for-event-booking-platform-32bytes-min
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  booking-service:
+    build: ./booking-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/eventbooking
+      SPRING_DATASOURCE_USERNAME: eventbooking
+      SPRING_DATASOURCE_PASSWORD: eventbooking
+      EVENT_SERVICE_BASE_URL: http://event-service:8081
+      JWT_SECRET: demo-shared-secret-key-for-event-booking-platform-32bytes-min
+    depends_on:
+      postgres:
+        condition: service_healthy
+      event-service:
+        condition: service_started
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - event-service
+      - booking-service
+
+volumes:
+  pgdata:
