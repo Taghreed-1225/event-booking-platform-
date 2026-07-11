@@ -1,0 +1,324 @@
+{
+  "info": {
+    "name": "Event Booking Platform",
+    "description": "event-service (8081) + booking-service (8082). Run requests top to bottom inside each folder.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "eventServiceUrl", "value": "http://localhost:8081" },
+    { "key": "bookingServiceUrl", "value": "http://localhost:8082" },
+    { "key": "adminToken", "value": "" },
+    { "key": "userToken", "value": "" },
+    { "key": "eventId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Register ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('adminToken', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin1\",\n  \"password\": \"admin1234\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": "{{eventServiceUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Register USER",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('userToken', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"sara\",\n  \"password\": \"sara1234\",\n  \"role\": \"USER\"\n}"
+            },
+            "url": "{{eventServiceUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('adminToken', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin1\",\n  \"password\": \"admin1234\"\n}"
+            },
+            "url": "{{eventServiceUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login USER",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('userToken', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"sara\",\n  \"password\": \"sara1234\"\n}"
+            },
+            "url": "{{eventServiceUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login wrong password (expect 401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"sara\",\n  \"password\": \"wrongpass\"\n}"
+            },
+            "url": "{{eventServiceUrl}}/api/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Events (event-service)",
+      "item": [
+        {
+          "name": "Create event (ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('eventId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spring Meetup\",\n  \"description\": \"Meet fellow developers\",\n  \"venue\": \"Cairo\",\n  \"startsAt\": \"2026-08-01T18:00:00Z\",\n  \"totalSeats\": 2\n}"
+            },
+            "url": "{{eventServiceUrl}}/api/events"
+          }
+        },
+        {
+          "name": "Create event as USER (expect 403 FORBIDDEN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Not allowed\",\n  \"description\": \"x\",\n  \"venue\": \"x\",\n  \"startsAt\": \"2026-08-01T18:00:00Z\",\n  \"totalSeats\": 5\n}"
+            },
+            "url": "{{eventServiceUrl}}/api/events"
+          }
+        },
+        {
+          "name": "Create event without token (expect 401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"No Auth\",\n  \"description\": \"x\",\n  \"venue\": \"x\",\n  \"startsAt\": \"2026-08-01T18:00:00Z\",\n  \"totalSeats\": 5\n}"
+            },
+            "url": "{{eventServiceUrl}}/api/events"
+          }
+        },
+        {
+          "name": "List all events",
+          "request": {
+            "method": "GET",
+            "url": "{{eventServiceUrl}}/api/events"
+          }
+        },
+        {
+          "name": "List events by status (PUBLISHED)",
+          "request": {
+            "method": "GET",
+            "url": "{{eventServiceUrl}}/api/events?status=PUBLISHED"
+          }
+        },
+        {
+          "name": "Get event by id",
+          "request": {
+            "method": "GET",
+            "url": "{{eventServiceUrl}}/api/events/{{eventId}}"
+          }
+        },
+        {
+          "name": "Publish event (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{eventServiceUrl}}/api/events/{{eventId}}/publish"
+          }
+        },
+        {
+          "name": "Publish again (expect 409 INVALID_STATE_TRANSITION)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{eventServiceUrl}}/api/events/{{eventId}}/publish"
+          }
+        },
+        {
+          "name": "Cancel event (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{eventServiceUrl}}/api/events/{{eventId}}/cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Bookings (booking-service)",
+      "item": [
+        {
+          "name": "Book seat as USER",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{eventId}}\"\n}"
+            },
+            "url": "{{bookingServiceUrl}}/api/bookings"
+          }
+        },
+        {
+          "name": "Book seat again (2nd seat, still allowed)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{eventId}}\"\n}"
+            },
+            "url": "{{bookingServiceUrl}}/api/bookings"
+          }
+        },
+        {
+          "name": "Book seat 3rd time (expect 409 MAX_SEATS_PER_USER_EXCEEDED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{eventId}}\"\n}"
+            },
+            "url": "{{bookingServiceUrl}}/api/bookings"
+          }
+        },
+        {
+          "name": "Book seat before publish (expect 409 EVENT_NOT_PUBLISHED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{eventId}}\"\n}"
+            },
+            "url": "{{bookingServiceUrl}}/api/bookings"
+          }
+        },
+        {
+          "name": "Book seat without token (expect 401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{eventId}}\"\n}"
+            },
+            "url": "{{bookingServiceUrl}}/api/bookings"
+          }
+        },
+        {
+          "name": "List bookings for event",
+          "request": {
+            "method": "GET",
+            "url": "{{bookingServiceUrl}}/api/bookings/event/{{eventId}}"
+          }
+        },
+        {
+          "name": "Get availability",
+          "request": {
+            "method": "GET",
+            "url": "{{bookingServiceUrl}}/api/events/{{eventId}}/availability"
+          }
+        }
+      ]
+    }
+  ]
+}
