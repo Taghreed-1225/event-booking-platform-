@@ -2,6 +2,14 @@
 
 A small microservices system for creating events and booking seats.
 
+## Demo video
+
+<video src="video/demo.mp4" controls width="720">
+  Your browser can't play this video. Download it directly: <a href="video/demo.mp4">video/demo.mp4</a>
+</video>
+
+Shows: running the app, publishing an event, booking a seat, an error case (no seats left), and the JWT token. No audio.
+
 ## Stack
 
 - **event-service** (Spring Boot 3, Java 21, port 8081) — manage events, state machine `DRAFT -> PUBLISHED -> CANCELLED`, user registration/login (JWT), Liquibase, Swagger
