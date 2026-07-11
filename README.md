@@ -4,9 +4,7 @@ A small microservices system for creating events and booking seats.
 
 ## Demo video
 
-<video src="video/demo.mp4" controls width="720">
-  Your browser can't play this video. Download it directly: <a href="video/demo.mp4">video/demo.mp4</a>
-</video>
+📹 [Watch/download the demo video](video/demo.mp4)
 
 Shows: running the app, publishing an event, booking a seat, an error case (no seats left), and the JWT token. No audio.
 
